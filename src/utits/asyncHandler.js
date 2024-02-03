@@ -1,14 +1,15 @@
+import e from "express"
+
 const asncHandler = (requestHandler) => {
-   (req, res , next) => {
-      Promise.resolve(requestHandler(req, res, next));
-      caches((err) => next(err))
+   return (req, res , next) => {
+      Promise.resolve(requestHandler(req, res, next)).catch(e => next(e))
    }
 }
 
-export default asncHandler
+export default asncHandler 
 
 
-/* const asyncHandler = (fn) => async(res,req,next) => {
+ /*const asyncHandler = (fn) => async(res,req,next) => {
    try {
     await fn(req,res,next);
    } catch (error) {

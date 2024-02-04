@@ -10,15 +10,19 @@ const registerUser = asncHandler(async (req, res) => {
     console.log("email:", email);
     //validation
     if (
-        [fullname, email, username, password].some((val) => val?.trim() === "")
+        [fullname, email, username, password].some(
+            (field) => {
+                console.log("field:", field)
+                return field?.trim() === ""
+            }
+        )
     ) {
-        throw new ApiError(
-            404,
-            "Please fill all the fields"
-        );
+        throw new ApiError(404, "Please fill all the fields");
     }
+    
+    
     // check user is allrady registered
-    const existerUser = User.findOne({
+    const existerUser = await User.findOne({
         $or: [{username},{email}]
     })
 
@@ -29,21 +33,21 @@ const registerUser = asncHandler(async (req, res) => {
         );
     }
     // chect for images, check avter,
-   const avterLocalPAth = req.files?.avatar[0]?.path
-    const coverImageLocalPAth = req.files?.coverImage[0]?.path
-    if (!avterLocalPAth) {
+    const avatarLocalPath = req.files?.avatar[0]?.path
+    console.log(avatarLocalPath)
+    
+    if (!avatarLocalPath) {
       throw new ApiError(
         400,
-        "Please upload avter"
+        "Please upload avatar"
       );
     }
     // uploard them to  clouinary, avter
-   const avter = await uploadOneCloudinary(avterLocalPAth)
-   const coverImage = await uploadOneCloudinary(coverImageLocalPAth)
-   if (!avter){
+   const avatar = await uploadOneCloudinary(avatarLocalPath)
+   if (!avatar){
     throw new ApiError(
       400,
-      "Please upload avter"
+      "Please upload avatar"
     );
    }
     // cheate user object -- create ectry
@@ -51,13 +55,12 @@ const registerUser = asncHandler(async (req, res) => {
         fullname,
         email,
         username: username.toLowerCase(),
-        avatar: avter.url,
-        coverImage: coverImage?.url || "",
+        avatar: avatar.url,
         password,
     })
   
     // remove password token field from response
-    const createatedUser =User.findById(user._id).select(
+    const createatedUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
  // check for user creation
@@ -70,9 +73,14 @@ const registerUser = asncHandler(async (req, res) => {
     
     // reaten res
 
-    return res.status(201).json(
-        new ApiResponse(200,createatedUser,"user created")
+    res.status(201).json(
+        new ApiResponse(
+            201,
+            "User created",
+            createatedUser
+        )
     )
+
 });
 
 export default registerUser;

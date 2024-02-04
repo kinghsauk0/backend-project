@@ -2,7 +2,7 @@ class ApiResponse {
     constructor(
         statusCode,
         message = "Success",
-        data,
+        data = null,
     ){
         this.statusCode = statusCode;
         this.message = message;

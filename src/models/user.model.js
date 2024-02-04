@@ -29,9 +29,6 @@ const userSchema = new Schema(
             type: String,
             require: true,
         },
-        coverImage: {
-            type: String,
-        },
         watchHistory: [
             {
                 type: Schema.Types.ObjectId,
@@ -83,4 +80,6 @@ userSchema.methods.generateRefreshToken = async function () {
         { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
     );
 };
-export default User = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema)
+
+export default User
